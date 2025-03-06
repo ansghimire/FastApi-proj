@@ -1,4 +1,4 @@
-import jwt  # Instead of "from jose import jwt"
+from jose import jwt
 from datetime import datetime, timedelta
 from typing import Optional
 from passlib.context import CryptContext

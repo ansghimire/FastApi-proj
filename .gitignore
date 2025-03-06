@@ -25,6 +25,7 @@ instance/
 config.yaml
 config.json
 migrations/
+alembic/
 alembic/versions/
 alembic.ini
 .dockerignore

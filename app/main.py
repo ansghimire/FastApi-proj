@@ -1,11 +1,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.v1.endpoints import auth, users, posts
 from app.core.config import settings
 from app.middlewares.logging_middleware import LoggingMiddleware
-from app.db.session import engine, Base
-from app.dependencies import get_db
+from app.db.session import engine
+from app.db.base import Base
+from app.common.error_handlers import custom_exception_handler, global_exception_handler
+from app.common.exceptions import CustomHTTPException
+from app.router import api_router  # Import the aggregated router
 
 # Initialize the FastAPI app
 app = FastAPI(title=settings.PROJECT_NAME, version=settings.PROJECT_VERSION)
@@ -22,10 +24,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include routers
-app.include_router(auth.router, prefix="/api/v1/auth", tags=["Auth"])
-app.include_router(users.router, prefix="/api/v1/users", tags=["Users"])
-app.include_router(posts.router, prefix="/api/v1/posts", tags=["Posts"])
+# Register exception handlers
+app.add_exception_handler(CustomHTTPException, custom_exception_handler)
+app.add_exception_handler(Exception, global_exception_handler)
+
+# Include the aggregated router from router.py
+app.include_router(api_router)
 
 # Database Initialization
 def create_tables():
@@ -47,4 +51,3 @@ async def shutdown_event():
 @app.get("/", tags=["Root"])
 async def root():
     return {"message": "Welcome to the FastAPI Project!"}
-
